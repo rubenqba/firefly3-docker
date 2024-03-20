@@ -89,7 +89,7 @@ services:
       MAIL_USERNAME: ${FF3_GMAIL_USERNAME}
       MAIL_PASSWORD_FILE: /run/secrets/gmail_password
       MAIL_ENCRYPTION: tls
-      ENABLE_EXTERNAL_RATES: true
+      ENABLE_EXTERNAL_RATES: "true"
     depends_on:
       - db
     networks:
