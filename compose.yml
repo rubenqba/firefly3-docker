@@ -1,6 +1,7 @@
 version: "3.8"
 
 networks:
+  ff3: {}
   proxy:
     name: ${PROXY_NETWORK_NAME:-proxy} 
     external: true
@@ -12,6 +13,13 @@ volumes:
       o: bind
       type: none
       device: ${FF3_STACK_DIR}/db
+  uploads: 
+    driver: local
+    driver_opts: 
+      o: bind
+      type: none
+      device: ${FF3_STACK_DIR}/uploads
+
 
 secrets: 
   db_root_password:
@@ -19,6 +27,12 @@ secrets:
     external: true
   db_user_password:
     name: ${FF3_MARIADB_USER_PASSWORD_NAME:-ff3_db_user_password}
+    external: true
+  api_encryption_key:
+    name: ${FF3_ENCRYPTION_KEY_NAME:-ff3_encryption_key}
+    external: true
+  crontab_token:
+    name: ${FF3_CRONTAB_TOKEN_NAME:-ff3_crontab_token}
     external: true
 
 configs:
@@ -31,9 +45,9 @@ services:
     image: mariadb:lts
     environment:
       MARIADB_ROOT_PASSWORD_FILE: /run/secrets/db_root_password
-      MARIADB_USER: ff3_db_user
-      MARIADB_PASSWORD_FILE: /run/secrets/db_user_password
-      MARIADB_DATABASE: ff3
+      MARIADB_DATABASE: ${FF3_DATABASE_NAME:-ff3}
+      MARIADB_USER: ${FF3_DATABASE_USER:-ff3_db_user}
+      MARIADB_PASSWORD_FILE: /run/secrets/db_user_password      
     configs:
       - source: last_backup
         target: /docker-entrypoint-initdb.d/01-initdb.sql
@@ -43,4 +57,51 @@ services:
     secrets: 
       - db_root_password
       - db_user_password
+    networks:
+      - ff3
 
+  app:
+    image: fireflyiii/core:latest
+    volumes:
+      - uploads:/var/www/html/storage/upload
+    environment:
+      DB_CONNECTION: mysql
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_DATABASE: ${FF3_DATABASE_NAME:-ff3}
+      DB_USERNAME: ${FF3_DATABASE_USER:-ff3_db_user}
+      DB_PASSWORD_FILE: /run/secrets/db_user_password
+      APP_URL: https://${FF3_FQDN}
+      TRUSTED_PROXIES: '**'
+      APP_ENV: production
+      TZ: $TZ
+      SITE_OWNER: ${FF3_SITE_OWNER}
+      APP_KEY_FILE: /run/secrets/api_encryption_key      
+      STATIC_CRON_TOKEN_FILE: /run/secrets/crontab_token
+      CACHE_DRIVER: file
+      SESSION_DRIVER: file
+    depends_on:
+      - db
+    networks:
+      - proxy
+      - ff3
+    ports:
+      - 8080:8080
+    secrets:
+      - db_user_password
+      - api_encryption_key
+      - crontab_token
+    
+  cron:
+    #
+    # To make this work, set STATIC_CRON_TOKEN in your .env file or as an environment variable and replace REPLACEME below
+    # The STATIC_CRON_TOKEN must be *exactly* 32 characters long
+    #
+    image: alpine
+    command: sh -c "crontab -l | { cat; echo '0 * * * * wget -qO- http://app:8080/api/v1/cron/$$(cat /run/secrets/crontab_token)'; } | crontab - && crond -f -L /dev/stdout"
+    environment: 
+      TOKEN_FILE: /run/secrets/crontab_token
+    networks:
+      - ff3
+    secrets:
+      - crontab_token
