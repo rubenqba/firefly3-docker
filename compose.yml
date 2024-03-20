@@ -51,7 +51,7 @@ services:
     configs:
       - source: last_backup
         target: /docker-entrypoint-initdb.d/01-initdb.sql
-        mode: 0600
+        mode: 0644
     volumes:
       - db_data:/var/lib/mysql
     secrets: 
