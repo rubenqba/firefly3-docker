@@ -60,37 +60,37 @@ services:
     networks:
       - ff3
 
-  app:
-    image: fireflyiii/core:latest
-    volumes:
-      - uploads:/var/www/html/storage/upload
-    environment:
-      DB_CONNECTION: mysql
-      DB_HOST: db
-      DB_PORT: 3306
-      DB_DATABASE: ${FF3_DATABASE_NAME:-ff3}
-      DB_USERNAME: ${FF3_DATABASE_USER:-ff3_db_user}
-      DB_PASSWORD_FILE: /run/secrets/db_user_password
-      APP_URL: https://${FF3_FQDN}
-      TRUSTED_PROXIES: '**'
-      APP_ENV: production
-      TZ: $TZ
-      SITE_OWNER: ${FF3_SITE_OWNER}
-      APP_KEY_FILE: /run/secrets/api_encryption_key      
-      STATIC_CRON_TOKEN_FILE: /run/secrets/crontab_token
-      CACHE_DRIVER: file
-      SESSION_DRIVER: file
-    depends_on:
-      - db
-    networks:
-      - proxy
-      - ff3
-    ports:
-      - 8080:8080
-    secrets:
-      - db_user_password
-      - api_encryption_key
-      - crontab_token
+  # app:
+  #   image: fireflyiii/core:latest
+  #   volumes:
+  #     - uploads:/var/www/html/storage/upload
+  #   environment:
+  #     DB_CONNECTION: mysql
+  #     DB_HOST: db
+  #     DB_PORT: 3306
+  #     DB_DATABASE: ${FF3_DATABASE_NAME:-ff3}
+  #     DB_USERNAME: ${FF3_DATABASE_USER:-ff3_db_user}
+  #     DB_PASSWORD_FILE: /run/secrets/db_user_password
+  #     APP_URL: https://${FF3_FQDN}
+  #     TRUSTED_PROXIES: '**'
+  #     APP_ENV: production
+  #     TZ: $TZ
+  #     SITE_OWNER: ${FF3_SITE_OWNER}
+  #     APP_KEY_FILE: /run/secrets/api_encryption_key      
+  #     STATIC_CRON_TOKEN_FILE: /run/secrets/crontab_token
+  #     CACHE_DRIVER: file
+  #     SESSION_DRIVER: file
+  #   depends_on:
+  #     - db
+  #   networks:
+  #     - proxy
+  #     - ff3
+  #   ports:
+  #     - 8080:8080
+  #   secrets:
+  #     - db_user_password
+  #     - api_encryption_key
+  #     - crontab_token
     
   cron:
     #
