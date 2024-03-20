@@ -3,25 +3,25 @@ version: "3.8"
 networks:
   ff3: {}
   proxy:
-    name: ${PROXY_NETWORK_NAME:-proxy} 
+    name: ${PROXY_NETWORK_NAME:-proxy}
     external: true
-    
+
 volumes:
-  db_data: 
+  db_data:
     driver: local
-    driver_opts: 
+    driver_opts:
       o: bind
       type: none
       device: ${FF3_STACK_DIR}/db
-  uploads: 
+  uploads:
     driver: local
-    driver_opts: 
+    driver_opts:
       o: bind
       type: none
       device: ${FF3_STACK_DIR}/uploads
 
 
-secrets: 
+secrets:
   db_root_password:
     name: ${FF3_MARIADB_ROOT_PASSWORD_NAME:-ff3_db_root_password}
     external: true
@@ -34,9 +34,12 @@ secrets:
   crontab_token:
     name: ${FF3_CRONTAB_TOKEN_NAME:-ff3_crontab_token}
     external: true
+  gmail_password:
+    name: ${FF3_GMAIL_PASSWORD_NAME:-ff3_gmail_password}
+    external: true
 
 configs:
-  last_backup: 
+  last_backup:
     name: ${FF3_LAST_BACKUP_FILE:-ff3_last_backup}
     external: true
 
@@ -47,14 +50,14 @@ services:
       MARIADB_ROOT_PASSWORD_FILE: /run/secrets/db_root_password
       MARIADB_DATABASE: ${FF3_DATABASE_NAME:-ff3}
       MARIADB_USER: ${FF3_DATABASE_USER:-ff3_db_user}
-      MARIADB_PASSWORD_FILE: /run/secrets/db_user_password      
+      MARIADB_PASSWORD_FILE: /run/secrets/db_user_password
     configs:
       - source: last_backup
         target: /docker-entrypoint-initdb.d/01-initdb.sql
         mode: 0644
     volumes:
       - db_data:/var/lib/mysql
-    secrets: 
+    secrets:
       - db_root_password
       - db_user_password
     networks:
@@ -76,10 +79,17 @@ services:
       APP_ENV: production
       TZ: $TZ
       SITE_OWNER: ${FF3_SITE_OWNER}
-      APP_KEY_FILE: /run/secrets/api_encryption_key      
+      APP_KEY_FILE: /run/secrets/api_encryption_key
       STATIC_CRON_TOKEN_FILE: /run/secrets/crontab_token
       CACHE_DRIVER: file
       SESSION_DRIVER: file
+      MAIL_MAILER: smtp
+      MAIL_HOST: smtp.gmail.com
+      MAIL_PORT: 587
+      MAIL_FROM: ${FF3_SITE_OWNER}
+      MAIL_USERNAME: ${FF3_GMAIL_USERNAME}
+      MAIL_PASSWORD_FILE: /run/secrets/gmail_password
+      MAIL_ENCRYPTION: tls
     depends_on:
       - db
     networks:
@@ -91,7 +101,8 @@ services:
       - db_user_password
       - api_encryption_key
       - crontab_token
-    
+      - gmail_password
+
   cron:
     #
     # To make this work, set STATIC_CRON_TOKEN in your .env file or as an environment variable and replace REPLACEME below
@@ -99,7 +110,7 @@ services:
     #
     image: alpine
     command: sh -c "crontab -l | { cat; echo '0 * * * * wget -qO- http://app:8080/api/v1/cron/$$(cat /run/secrets/crontab_token)'; } | crontab - && crond -f -L /dev/stdout"
-    environment: 
+    environment:
       TOKEN_FILE: /run/secrets/crontab_token
     networks:
       - ff3
