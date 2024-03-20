@@ -20,7 +20,6 @@ volumes:
       type: none
       device: ${FF3_STACK_DIR}/uploads
 
-
 secrets:
   db_root_password:
     name: ${FF3_MARIADB_ROOT_PASSWORD_NAME:-ff3_db_root_password}
@@ -75,7 +74,7 @@ services:
       DB_USERNAME: ${FF3_DATABASE_USER:-ff3_db_user}
       DB_PASSWORD_FILE: /run/secrets/db_user_password
       APP_URL: https://${FF3_FQDN}
-      TRUSTED_PROXIES: '**'
+      TRUSTED_PROXIES: "**"
       APP_ENV: production
       TZ: $TZ
       SITE_OWNER: ${FF3_SITE_OWNER}
@@ -90,6 +89,7 @@ services:
       MAIL_USERNAME: ${FF3_GMAIL_USERNAME}
       MAIL_PASSWORD_FILE: /run/secrets/gmail_password
       MAIL_ENCRYPTION: tls
+      ENABLE_EXTERNAL_RATES: true
     depends_on:
       - db
     networks:
