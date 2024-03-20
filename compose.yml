@@ -1,0 +1,46 @@
+version: "3.8"
+
+networks:
+  proxy:
+    name: ${PROXY_NETWORK_NAME:-proxy} 
+    external: true
+    
+volumes:
+  db_data: 
+    driver: local
+    driver_opts: 
+      o: bind
+      type: none
+      device: ${FF3_STACK_DIR}/db
+
+secrets: 
+  db_root_password:
+    name: ${FF3_MARIADB_ROOT_PASSWORD_NAME:-ff3_db_root_password}
+    external: true
+  db_user_password:
+    name: ${FF3_MARIADB_USER_PASSWORD_NAME:-ff3_db_user_password}
+    external: true
+
+configs:
+  last_backup: 
+    name: ${FF3_LAST_BACKUP_FILE:-ff3_last_backup}
+    external: true
+
+services:
+  db:
+    image: mariadb:lts
+    environment:
+      MARIADB_ROOT_PASSWORD_FILE: /run/secrets/db_root_password
+      MARIADB_USER: ff3_db_user
+      MARIADB_PASSWORD_FILE: /run/secrets/db_user_password
+      MARIADB_DATABASE: ff3
+    configs:
+      - source: last_backup
+        target: /docker-entrypoint-initdb.d/01-initdb.sql
+        mode: 0600
+    volumes:
+      - db_data:/var/lib/mysql
+    secrets: 
+      - db_root_password
+      - db_user_password
+
