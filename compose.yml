@@ -95,8 +95,6 @@ services:
     networks:
       - proxy
       - ff3
-    ports:
-      - 8080:8080
     secrets:
       - db_user_password
       - api_encryption_key
