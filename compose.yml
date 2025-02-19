@@ -100,6 +100,12 @@ services:
       - api_encryption_key
       - crontab_token
       - gmail_password
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sL http://localhost:8080/healthcheck | grep -q OK"]
+      interval: 1m30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
 
   cron:
     #
