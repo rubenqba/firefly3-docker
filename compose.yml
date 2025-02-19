@@ -68,6 +68,12 @@ services:
       - db_user_password
     networks:
       - ff3
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u root -p$$(cat /run/secrets/mariadb_root_password) | grep -q 'mysqld is alive'"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 40s  # Tiempo extra para inicialización de la BD      
 
   app:
     image: fireflyiii/core:latest
@@ -127,3 +133,5 @@ services:
       - ff3
     secrets:
       - crontab_token
+    depends_on:
+      - app
