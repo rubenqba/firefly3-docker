@@ -56,7 +56,7 @@ services:
       MARIADB_ROOT_PASSWORD_FILE: /run/secrets/ff3_db_root_password
       MARIADB_DATABASE: ${FF3_DATABASE_NAME:-ff3}
       MARIADB_USER: ${FF3_DATABASE_USER:-ff3_db_user}
-      ADB_PASSWORD_FILE: /run/secrets/ff3_db_user_password
+      MARIADB_PASSWORD_FILE: /run/secrets/ff3_db_user_password
     # configs:
     #   - source: last_backup
     #     target: /docker-entrypoint-initdb.d/01-initdb.sql
