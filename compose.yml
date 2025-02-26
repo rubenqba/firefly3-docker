@@ -113,9 +113,18 @@ services:
         target: /run/secrets/api_encryption_key
         uid: "33"
         gid: "33"
-      - db_user_password
-      - crontab_token
-      - gmail_password
+      - source: db_user_password
+        target: /run/secrets/db_user_password
+        uid: "33"
+        gid: "33"
+      - source: crontab_token
+        target: /run/secrets/crontab_token
+        uid: "33"
+        gid: "33"
+      - source: gmail_password
+        target: /run/secrets/gmail_password
+        uid: "33"
+        gid: "33"
     healthcheck:
       test: ["CMD-SHELL", "curl -sL http://localhost:8080/healthcheck | grep -q OK"]
       interval: 1m30s
