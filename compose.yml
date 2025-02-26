@@ -109,8 +109,11 @@ services:
       - proxy
       - ff3
     secrets:
+      - source: api_encryption_key
+        target: /run/secrets/api_encryption_key
+        uid: "33"
+        gid: "33"
       - db_user_password
-      - api_encryption_key
       - crontab_token
       - gmail_password
     healthcheck:
