@@ -43,10 +43,11 @@ secrets:
     name: ${FF3_GMAIL_PASSWORD_NAME:-ff3_gmail_password}
     external: true
 
-configs:
-  last_backup:
-    name: ${FF3_LAST_BACKUP_FILE:-ff3_last_backup}
-    external: true
+# backups are too large for configuration now    
+# configs:
+#   last_backup:
+#     name: ${FF3_LAST_BACKUP_FILE:-ff3_last_backup}
+#     external: true
 
 services:
   db:
@@ -56,10 +57,10 @@ services:
       MARIADB_DATABASE: ${FF3_DATABASE_NAME:-ff3}
       MARIADB_USER: ${FF3_DATABASE_USER:-ff3_db_user}
       MARIADB_PASSWORD_FILE: /run/secrets/db_user_password
-    configs:
-      - source: last_backup
-        target: /docker-entrypoint-initdb.d/01-initdb.sql
-        mode: 0644
+    # configs:
+    #   - source: last_backup
+    #     target: /docker-entrypoint-initdb.d/01-initdb.sql
+    #     mode: 0644
     volumes:
       - db_data:/var/lib/mysql
       - db_backup:/backup
@@ -76,7 +77,7 @@ services:
       start_period: 40s  # Tiempo extra para inicialización de la BD      
 
   app:
-    image: fireflyiii/core:latest
+    image: fireflyiii/core:version-6.2.9
     volumes:
       - uploads:/var/www/html/storage/upload
     environment:
