@@ -70,7 +70,7 @@ services:
     networks:
       - ff3
     healthcheck:
-      test: ["CMD-SHELL", "mariadb-admin ping -h localhost -u root -p$$(cat /run/secrets/db_root_password) | grep -q 'is alive'"]
+      test: ["CMD-SHELL", "mariadb-admin ping -h localhost -u root -p$$(cat /run/secrets/ff3_db_root_password) | grep -q 'is alive'"]
       interval: 10s
       timeout: 5s
       retries: 5
