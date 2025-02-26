@@ -33,7 +33,7 @@ secrets:
   db_user_password:
     name: ${FF3_MARIADB_USER_PASSWORD_NAME:-ff3_db_user_password}
     external: true
-  api_encryption_key:
+  app_encryption_key:
     name: ${FF3_ENCRYPTION_KEY_NAME:-ff3_encryption_key}
     external: true
   crontab_token:
@@ -70,7 +70,7 @@ services:
     networks:
       - ff3
     healthcheck:
-      test: ["CMD-SHELL", "mariadb-admin ping -h localhost -u root -p$$(cat /run/secrets/db_root_password) | grep -q 'mysqld is alive'"]
+      test: ["CMD-SHELL", "mariadb-admin ping -h localhost -u root -p$$(cat /run/secrets/db_root_password) | grep -q 'is alive'"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -89,13 +89,9 @@ services:
       DB_PASSWORD_FILE: /run/secrets/db_user_password
       APP_URL: https://${FF3_FQDN}
       TRUSTED_PROXIES: "**"
-      APP_ENV: production
-      TZ: $TZ
       SITE_OWNER: ${FF3_SITE_OWNER}
-      APP_KEY_FILE: /run/secrets/api_encryption_key
+      APP_KEY_FILE: /run/secrets/app_encryption_key
       STATIC_CRON_TOKEN_FILE: /run/secrets/crontab_token
-      CACHE_DRIVER: file
-      SESSION_DRIVER: file
       MAIL_MAILER: smtp
       MAIL_HOST: smtp.gmail.com
       MAIL_PORT: 587
@@ -110,26 +106,10 @@ services:
       - proxy
       - ff3
     secrets:
-      - source: api_encryption_key
-        target: /run/secrets/api_encryption_key
-        uid: "33"
-        gid: "33"
-        mode: 0600
-      - source: db_user_password
-        target: /run/secrets/db_user_password
-        uid: "33"
-        gid: "33"
-        mode: 0600
-      - source: crontab_token
-        target: /run/secrets/crontab_token
-        uid: "33"
-        gid: "33"
-        mode: 0600
-      - source: gmail_password
-        target: /run/secrets/gmail_password
-        uid: "33"
-        gid: "33"
-        mode: 0600
+      - app_encryption_key
+      - db_user_password
+      - crontab_token
+      - gmail_password
     healthcheck:
       test: ["CMD-SHELL", "curl -sL http://localhost:8080/healthcheck | grep -q OK"]
       interval: 1m30s
