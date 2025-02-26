@@ -86,7 +86,7 @@ services:
       DB_PORT: 3306
       DB_DATABASE: ${FF3_DATABASE_NAME:-ff3}
       DB_USERNAME: ${FF3_DATABASE_USER:-ff3_db_user}
-      ASSWORD_FILE: /run/secrets/ff3_db_user_password
+      DB_PASSWORD_FILE: /run/secrets/ff3_db_user_password
       APP_URL: https://${FF3_FQDN}
       TRUSTED_PROXIES: "**"
       SITE_OWNER: ${FF3_SITE_OWNER}
