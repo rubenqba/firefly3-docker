@@ -77,7 +77,7 @@ services:
       start_period: 40s  # Tiempo extra para inicialización de la BD      
 
   app:
-    image: fireflyiii/core:version-6.2.9
+    image: fireflyiii/core:version-6.2
     volumes:
       - uploads:/var/www/html/storage/upload
     environment:
