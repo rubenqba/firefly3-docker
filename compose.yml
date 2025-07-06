@@ -116,6 +116,12 @@ services:
       timeout: 10s
       retries: 3
       start_period: 20s
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.ff3.rule=Host(`${FF3_FQDN}`)
+      - traefik.http.routers.ff3.tls=true
+      - traefik.http.routers.ff3.tls.certresolver=cloudflare
+      - traefik.http.services.ff3.loadbalancer.server.port=8080
 
   cron:
     #
